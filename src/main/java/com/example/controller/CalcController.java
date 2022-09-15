@@ -18,23 +18,28 @@ public class CalcController {
                               @RequestParam(value =  "b", required = false) int b,
                               @RequestParam (value = "operation",required = false) String operation,
                               Model model){
-        int x;
+        double resault;
 
-        if ("multiplication".equals(operation)){
-            x = (a*b);
+        switch (operation){
+            case "multiplication":
+                resault = a*b;
+                break;
+            case "addition":
+                resault =a+b;
+                break;
+            case "subtraction":
+                resault = a-b;
+                break;
+            case "division":
+                resault = (double) a/b;
+                break;
+            default: resault = 0;
         }
-        if ("addition".equals(operation)){
-            x = a+b;
-        }
-        if ("subtraction".equals(operation)){
-            x = a-b;
-        } else x = a/b;
-        model.addAttribute("massage", x);
+
+
+        model.addAttribute("massage", resault);
         return "calculation";
     }
 
-    @GetMapping("/")
-    public Integer get(){
-        return new Integer(5);
-    }
+
 }
