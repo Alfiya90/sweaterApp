@@ -12,11 +12,11 @@ import java.util.List;
 
 @Component
 public class PersonDAO {
-    int counter = 0;
+
     private  static final String URL = "jdbc:mysql://localhost:3306/people";
     private static final String USERNAME = "root";
     private static final String PASSWORD = "@l1990fi";
-    private static   Connection connection;
+    /*private static   Connection connection;*/
 
 
     static {
@@ -26,20 +26,24 @@ public class PersonDAO {
             e.printStackTrace();
         }
 
-        try {
+       /* try {
             connection = DriverManager.getConnection(URL, USERNAME, PASSWORD);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
-        }
+        }*/
     }
-
+    private  Connection getConnection() throws SQLException {
+        return  DriverManager.getConnection(URL, USERNAME, PASSWORD);
+    }
 
 
 
 
     public List<Person> index() {
         List <Person> people = new ArrayList<>();
+
         try {
+            Connection connection = getConnection();
             Statement statement = connection.createStatement();
             String SQL = "SELECT * FROM Persons";
             ResultSet resultSet = statement.executeQuery(SQL);
@@ -53,17 +57,21 @@ public class PersonDAO {
 
                 people.add(person);
             }
+            statement.close();
+            connection.close();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
+
         return people;
     }
 
     public Person show(int id) {
-        Person person = null;
+        Person person = new Person();
 
 
         try {
+            Connection connection = getConnection();
             PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM Persons WHERE id=?");
             preparedStatement.setInt(1,id);
             ResultSet resultSet = preparedStatement.executeQuery();
@@ -72,8 +80,8 @@ public class PersonDAO {
             person.setName(resultSet.getString("name"));
             person.setAge(resultSet.getInt("age"));
             person.setEmail(resultSet.getString("email"));
-
-
+            preparedStatement.close();
+            connection.close();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -89,12 +97,15 @@ public class PersonDAO {
 
     public void save(Person person) {
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO person VALUES(1,?,?,?)");
+            Connection connection = getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO Persons (name, age, email) VALUES(?,?,?)" );
+            /*PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO Persons VALUES(1,?,?,?)");*/
             preparedStatement.setString(1, person.getName());
             preparedStatement.setInt(2, person.getAge());
             preparedStatement.setString(3, person.getEmail());
-
             preparedStatement.executeUpdate();
+            preparedStatement.close();
+            connection.close();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -104,16 +115,20 @@ public class PersonDAO {
 
     public void update(int id, Person updatePerson) {
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement("UPDATE Persons SET name = ?, ag e= ?, email = ? WHERE id=?");
+            Connection connection = getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement("UPDATE Persons SET name = ?, age= ?, email = ? WHERE id=?");
+            preparedStatement.setInt(4, id);
             preparedStatement.setString(1,updatePerson.getName());
             preparedStatement.setInt(2, updatePerson.getAge());
             preparedStatement.setString(3, updatePerson.getEmail());
-            preparedStatement.setInt(4, id);
             preparedStatement.executeUpdate();
+            preparedStatement.close();
+            connection.close();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
         /*Person personToBeUpdated = show(id);
+
         personToBeUpdated.setName(updatePerson.getName());
         personToBeUpdated.setAge(updatePerson.getAge());
         personToBeUpdated.setEmail(updatePerson.getEmail());*/
@@ -123,9 +138,12 @@ public class PersonDAO {
 
 
         try {
+            Connection connection = getConnection();
             PreparedStatement preparedStatement = connection.prepareStatement("DELETE FROM Persons WHERE id=?");
             preparedStatement.setInt(1, id);
             preparedStatement.executeUpdate();
+            preparedStatement.close();
+            connection.close();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
